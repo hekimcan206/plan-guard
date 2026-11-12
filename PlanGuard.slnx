@@ -3,5 +3,6 @@
     <Project Path="src/PlanGuard.Core/PlanGuard.Core.csproj" />
     <Project Path="src/PlanGuard.Postgres/PlanGuard.Postgres.csproj" />
     <Project Path="src/PlanGuard.Cli/PlanGuard.Cli.csproj" />
+    <Project Path="src/PlanGuard.Lab/PlanGuard.Lab.csproj" />
   </Folder>
 </Solution>

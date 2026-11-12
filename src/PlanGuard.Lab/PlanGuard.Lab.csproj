@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PlanGuard.Lab</RootNamespace>
+    <AssemblyName>plan-guard-lab</AssemblyName>
+    <Description>Synthetic shop database, regression scenarios, the compose demo and the detector experiment.</Description>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlanGuard.Core\PlanGuard.Core.csproj" />
+    <ProjectReference Include="..\PlanGuard.Postgres\PlanGuard.Postgres.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\samples\shop\**\*" LinkBase="shop" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

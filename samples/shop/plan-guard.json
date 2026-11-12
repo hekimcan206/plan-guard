@@ -1,0 +1,15 @@
+{
+  // Catalog: one query per file, named after the file.
+  "queries": ["queries/*.sql"],
+  "runs": 5,
+  "warmups": 1,
+  "statementTimeoutMs": 30000,
+  "settings": { "jit": "off" },
+  "thresholds": {
+    "bufferRatio": 1.3,
+    "bufferMinDelta": 64,
+    "timeGate": "Warn"
+  },
+  "ignore": [],
+  "failOn": "Fail"
+}
