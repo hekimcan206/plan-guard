@@ -1,0 +1,7 @@
+Limit  (cost=5676.93..5677.39 rows=4) (actual rows=7 loops=1) [shared=2508]
+  ->  Gather Merge  (cost=5676.93..5677.39 rows=4) (actual rows=7 loops=1) [shared=2508]
+        ->  Sort  (cost=4676.92..4676.93 rows=4) (actual rows=4 loops=2) [shared=2508]
+              Sort Method: quicksort (Memory)
+              ->  Seq Scan on orders  (cost=0.00..4676.88 rows=4) (actual rows=4 loops=2) [shared=2471]
+                    Filter: (orders.customer_id = 4242)
+                    Rows Removed by Filter: 149996

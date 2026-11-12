@@ -1,0 +1,1 @@
+Limit[](Gather Merge[parent=Outer](Sort[parent=Outer](Seq Scan[rel=orders;parent=Outer])))

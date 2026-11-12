@@ -1,0 +1,13 @@
+plan-guard: FAILED (1 regression, 1 warning, 1 improved)
+baseline main  ->  candidate pr-42   (4 queries)
+  FAIL     customer_recent_orders
+           fail        Shared buffers (median blocks): 10 -> 2,508 (x250.80).
+           warn        Execution time (median ms): 0.07 -> 9.24 (x132.00).
+           warn        Planner cost: 27.8 -> 5,677 (x204.59).
+           info        Plan changed: removed Bitmap Heap Scan on orders, Bitmap Index Scan on orders_customer_idx; added Gather Merge, Seq Scan on orders.
+  WARN     store_daily_revenue   
+           warn        Execution time (median ms): 2 -> 12 (x6.00).
+  IMPROVED top_customers         
+           improvement Shared buffers (median blocks): 2,472 -> 169 (-93%).
+           improvement Execution time (median ms): 36 -> 12 (-67%).
+  PASS     customers_per_city    

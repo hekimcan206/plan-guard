@@ -1,0 +1,53 @@
+[
+  {
+    "Plan": {
+      "Node Type": "Nested Loop",
+      "Parallel Aware": false,
+      "Async Capable": false,
+      "Join Type": "Inner",
+      "Startup Cost": 0.71,
+      "Total Cost": 41.70,
+      "Plan Rows": 4,
+      "Plan Width": 11,
+      "Output": ["oi.line_no", "m.name"],
+      "Inner Unique": true,
+      "Plans": [
+        {
+          "Node Type": "Index Scan",
+          "Parent Relationship": "Outer",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Scan Direction": "Forward",
+          "Index Name": "order_items_order_idx",
+          "Relation Name": "order_items",
+          "Schema": "public",
+          "Alias": "oi",
+          "Startup Cost": 0.42,
+          "Total Cost": 8.50,
+          "Plan Rows": 4,
+          "Plan Width": 8,
+          "Output": ["oi.id", "oi.order_id", "oi.line_no", "oi.menu_item_id", "oi.qty", "oi.unit_price"],
+          "Index Cond": "(oi.order_id = $1)"
+        },
+        {
+          "Node Type": "Index Scan",
+          "Parent Relationship": "Inner",
+          "Parallel Aware": false,
+          "Async Capable": false,
+          "Scan Direction": "Forward",
+          "Index Name": "menu_items_pkey",
+          "Relation Name": "menu_items",
+          "Schema": "public",
+          "Alias": "m",
+          "Startup Cost": 0.28,
+          "Total Cost": 8.30,
+          "Plan Rows": 1,
+          "Plan Width": 11,
+          "Output": ["m.id", "m.store_id", "m.name", "m.category", "m.price"],
+          "Index Cond": "(m.id = oi.menu_item_id)"
+        }
+      ]
+    },
+    "Query Identifier": 1365400326340266660
+  }
+]
