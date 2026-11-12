@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>PlanGuard.Postgres</RootNamespace>
+    <Description>PostgreSQL capture for plan-guard: EXPLAIN ANALYZE runs, pg_stat_statements discovery and a snapshot history store.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlanGuard.Core\PlanGuard.Core.csproj" />
+  </ItemGroup>
+
+</Project>

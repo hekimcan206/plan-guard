@@ -20,11 +20,31 @@ public static class MarkdownReport
     public static string Render(ComparisonReport report)
     {
         ArgumentNullException.ThrowIfNull(report);
-        var full = Build(report, includePlans: true);
-        return full.Length <= MaxLength ? full : Build(report, includePlans: false);
+        // Degrade step by step: drop plan trees, then the per-query details, then the tail of the table (the table
+        // is sorted worst first, so failures are the last thing to go).
+        var md = Build(report, includePlans: true, includeDetails: true, maxRows: int.MaxValue);
+        if (md.Length <= MaxLength)
+        {
+            return md;
+        }
+
+        md = Build(report, includePlans: false, includeDetails: true, maxRows: int.MaxValue);
+        if (md.Length <= MaxLength)
+        {
+            return md;
+        }
+
+        var rows = report.Queries.Count;
+        do
+        {
+            md = Build(report, includePlans: false, includeDetails: false, maxRows: rows);
+            rows = rows * 3 / 4;
+        }
+        while (md.Length > MaxLength && rows > 0);
+        return md;
     }
 
-    private static string Build(ComparisonReport report, bool includePlans)
+    private static string Build(ComparisonReport report, bool includePlans, bool includeDetails, int maxRows)
     {
         var sb = new StringBuilder();
         sb.AppendLine(Marker);
@@ -48,15 +68,20 @@ public static class MarkdownReport
 
         sb.AppendLine("| Query | Verdict | Shared blocks | Temp blocks | Cost | Time (ms) | Plan |");
         sb.AppendLine("|---|---|---:|---:|---:|---:|---|");
-        foreach (var q in report.Queries.OrderByDescending(q => q.Verdict).ThenBy(q => q.Id, StringComparer.Ordinal))
+        var ordered = report.Queries.OrderByDescending(q => q.Verdict).ThenBy(q => q.Id, StringComparer.Ordinal).ToList();
+        foreach (var q in ordered.Take(maxRows))
         {
             sb.AppendLine(CultureInfo.InvariantCulture,
                 $"| `{Escape(q.Id)}` | {VerdictText(q.Verdict)} | {Pair(q.Baseline?.MedianSharedBlocks ?? q.Baseline?.SharedBlocksPerCall, q.Candidate?.MedianSharedBlocks ?? q.Candidate?.SharedBlocksPerCall)} | {Pair(q.Baseline?.MedianTempBlocks, q.Candidate?.MedianTempBlocks)} | {Pair(Cost(q.Baseline), Cost(q.Candidate))} | {Pair(q.Baseline?.MedianExecutionMs, q.Candidate?.MedianExecutionMs)} | {PlanCell(q)} |");
         }
 
+        if (ordered.Count > maxRows)
+        {
+            sb.AppendLine(CultureInfo.InvariantCulture, $"| ... | {ordered.Count - maxRows} more queries in the JSON report | | | | | |");
+        }
+
         sb.AppendLine();
-        foreach (var q in report.Queries.Where(q => q.Verdict is Verdict.Fail or Verdict.Warn or Verdict.Changed or Verdict.Improved)
-                     .OrderByDescending(q => q.Verdict).ThenBy(q => q.Id, StringComparer.Ordinal))
+        foreach (var q in ordered.Where(q => includeDetails && q.Verdict is Verdict.Fail or Verdict.Warn or Verdict.Changed or Verdict.Improved))
         {
             AppendDetails(sb, q, includePlans);
         }
@@ -70,7 +95,9 @@ public static class MarkdownReport
         if (!includePlans)
         {
             sb.AppendLine();
-            sb.AppendLine("<sub>Plan trees were left out to fit GitHub's comment size limit; see the JSON report artifact.</sub>");
+            sb.AppendLine(includeDetails
+                ? "<sub>Plan trees were left out to fit GitHub's comment size limit; see the JSON report artifact.</sub>"
+                : "<sub>Plan trees and per-query details were left out to fit GitHub's comment size limit; see the JSON report artifact.</sub>");
         }
 
         return sb.ToString();

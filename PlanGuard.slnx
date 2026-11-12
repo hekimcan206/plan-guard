@@ -1,5 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/PlanGuard.Core/PlanGuard.Core.csproj" />
+    <Project Path="src/PlanGuard.Postgres/PlanGuard.Postgres.csproj" />
+    <Project Path="src/PlanGuard.Cli/PlanGuard.Cli.csproj" />
   </Folder>
 </Solution>

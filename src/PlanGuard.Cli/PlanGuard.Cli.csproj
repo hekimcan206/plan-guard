@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>PlanGuard.Cli</RootNamespace>
+    <AssemblyName>plan-guard</AssemblyName>
+    <Description>CI query-plan regression detector for PostgreSQL: captures EXPLAIN plans and pg_stat_statements, fails the build and comments on the pull request when a change makes a query do more work.</Description>
+
+    <IsPackable>true</IsPackable>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>plan-guard</ToolCommandName>
+    <PackageId>PlanGuard</PackageId>
+    <PackageTags>postgresql;explain;query-plan;performance;regression;ci;github-actions</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PlanGuard.Core\PlanGuard.Core.csproj" />
+    <ProjectReference Include="..\PlanGuard.Postgres\PlanGuard.Postgres.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PlanGuard.UnitTests" />
+    <InternalsVisibleTo Include="PlanGuard.IntegrationTests" />
+  </ItemGroup>
+
+</Project>
