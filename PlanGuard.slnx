@@ -6,6 +6,7 @@
     <Project Path="src/PlanGuard.Lab/PlanGuard.Lab.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/PlanGuard.IntegrationTests/PlanGuard.IntegrationTests.csproj" />
     <Project Path="tests/PlanGuard.UnitTests/PlanGuard.UnitTests.csproj" />
   </Folder>
 </Solution>
