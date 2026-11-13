@@ -5,10 +5,10 @@ Compared **4** queries: `main` (baseline) vs `pr-42` (candidate), PostgreSQL 17.
 
 | Query | Verdict | Shared blocks | Temp blocks | Cost | Time (ms) | Plan |
 |---|---|---:|---:|---:|---:|---|
-| `customer_recent_orders` | **FAIL** | 10 -> 2,508 | 0 | 27.8 -> 5,677 | 0.07 -> 9.24 | Bitmap Heap Scan on orders -&gt; Seq Scan on orders |
-| `store_daily_revenue` | warn | 163 | 0 | 514 | 2 -> 12 | same |
-| `top_customers` | improved | 2,472 -> 169 | 0 | 8,119 -> 2,361 | 36 -> 12 | same |
-| `customers_per_city` | pass | 569 | 0 | 1,319 | 8 -> 8.10 | same |
+| `customer_recent_orders` | **FAIL** | 10&nbsp;→ 2,508 | 0 | 27.8&nbsp;→ 5,677 | 0.07&nbsp;→ 9.24 | Bitmap Heap Scan on orders → Seq Scan on orders |
+| `store_daily_revenue` | warn | 163 | 0 | 514 | 2&nbsp;→ 12 | same |
+| `top_customers` | improved | 2,472&nbsp;→ 169 | 0 | 8,119&nbsp;→ 2,361 | 36&nbsp;→ 12 | same |
+| `customers_per_city` | pass | 569 | 0 | 1,319 | 8&nbsp;→ 8.10 | same |
 
 <details open>
 <summary><b>customer_recent_orders</b>: FAIL</summary>

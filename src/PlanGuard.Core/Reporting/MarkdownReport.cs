@@ -222,7 +222,7 @@ public static class MarkdownReport
             // Scans say the most about a regression (an index scan turning into a sequential scan), so they lead.
             var removed = d.Removed.FirstOrDefault(l => l.Contains("Scan", StringComparison.Ordinal)) ?? (d.Removed.Count > 0 ? d.Removed[0] : null);
             var added = d.Added.FirstOrDefault(l => l.Contains("Scan", StringComparison.Ordinal)) ?? (d.Added.Count > 0 ? d.Added[0] : null);
-            return Escape($"{removed ?? "..."} -> {added ?? "..."}");
+            return Escape($"{removed ?? "..."} → {added ?? "..."}");
         }
 
         return "reordered";
@@ -247,7 +247,7 @@ public static class MarkdownReport
             return SnapshotComparer.Format(c.Value);
         }
 
-        return $"{SnapshotComparer.Format(b.Value)} -> {SnapshotComparer.Format(c.Value)}";
+        return $"{SnapshotComparer.Format(b.Value)}&nbsp;→ {SnapshotComparer.Format(c.Value)}";
     }
 
     private static string Sha(SnapshotMeta m) => m.GitSha is { Length: >= 7 } sha ? $" ({sha[..7]})" : string.Empty;
