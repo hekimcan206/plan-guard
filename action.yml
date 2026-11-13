@@ -37,6 +37,10 @@ inputs:
     description: "fail (default: only regressions fail the step) or warn (warnings fail it too)."
     required: false
     default: ""
+  report:
+    description: "Where to write the Markdown report (compare). Default: a file under RUNNER_TEMP."
+    required: false
+    default: ""
   comment:
     description: "On pull_request events, create or update one plan-guard comment on the PR (true/false)."
     required: false
@@ -93,6 +97,7 @@ runs:
         PG_BASELINE: ${{ inputs.baseline }}
         PG_CANDIDATE: ${{ inputs.candidate }}
         PG_FAIL_ON: ${{ inputs.fail-on }}
+        PG_REPORT: ${{ inputs.report }}
         PG_COMMENT: ${{ inputs.comment }}
         PG_PR_NUMBER: ${{ github.event.pull_request.number }}
         PG_TOKEN: ${{ inputs.github-token }}
@@ -107,7 +112,7 @@ runs:
             echo "snapshot=$PG_OUTPUT" >> "$GITHUB_OUTPUT"
             ;;
           compare)
-            report="$RUNNER_TEMP/plan-guard-report-$RANDOM.md"
+            report="${PG_REPORT:-$RUNNER_TEMP/plan-guard-report-$RANDOM.md}"
             json="$RUNNER_TEMP/plan-guard-report-$RANDOM.json"
             args=(compare --baseline "$PG_BASELINE" --candidate "$PG_CANDIDATE" --markdown "$report" --json "$json" --github)
             if [ -f "$PG_CONFIG" ]; then args+=(--config "$PG_CONFIG"); fi
@@ -122,10 +127,19 @@ runs:
               GITHUB_TOKEN="$PG_TOKEN" "${tool[@]}" comment --report "$report" --pr "$PG_PR_NUMBER" \
                 || echo "::warning title=plan-guard::Could not comment on the pull request (read-only token on a fork PR?)."
             fi
-            exit "$code"
+            echo "exit-code=$code" >> "$GITHUB_OUTPUT"
+            # Exit 0 for a verdict (0 or 1) so the outputs above reach the caller; the next step fails the build.
+            if [ "$code" -gt 1 ]; then exit "$code"; fi
             ;;
           *)
             echo "::error title=plan-guard::command must be capture, discover or compare, not '$PG_COMMAND'"
             exit 2
             ;;
         esac
+
+    - name: Fail on regression
+      if: steps.run.outputs.exit-code == '1'
+      shell: bash
+      run: |
+        echo "::error title=plan-guard::plan-guard found a query-plan regression (see the report above)."
+        exit 1

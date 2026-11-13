@@ -196,6 +196,7 @@ jobs:
           config: samples/shop/plan-guard.json
           baseline: main.json
           candidate: pr.json
+          report: pr-comment.md
           comment: "false"
 
       - name: Compare unchanged (must pass)
@@ -211,16 +212,12 @@ jobs:
       - name: Assert the verdicts
         env:
           REGRESSION_OUTCOME: ${{ steps.regression.outcome }}
-          REGRESSION_VERDICT: ${{ steps.regression.outputs.verdict }}
-          REGRESSION_REPORT: ${{ steps.regression.outputs.report }}
           UNCHANGED_VERDICT: ${{ steps.unchanged.outputs.verdict }}
         run: |
           test "$REGRESSION_OUTCOME" = "failure"
-          test "$REGRESSION_VERDICT" = "fail"
           test "$UNCHANGED_VERDICT" = "pass"
-          grep -q '| `customer_recent_orders` | \*\*FAIL\*\* |' "$REGRESSION_REPORT"
-          grep -q 'Seq Scan on orders' "$REGRESSION_REPORT"
-          cp "$REGRESSION_REPORT" pr-comment.md
+          grep -q '| `customer_recent_orders` | \*\*FAIL\*\* |' pr-comment.md
+          grep -q 'Seq Scan on orders' pr-comment.md
 
       - uses: actions/upload-artifact@v7
         if: always()
