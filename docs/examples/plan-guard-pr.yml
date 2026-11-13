@@ -1,0 +1,82 @@
+# Example consumer workflow: capture the base branch and the pull request in the same job (ADR 0003),
+# compare, fail on a regression and keep one up-to-date comment on the PR.
+#
+# Adapt the two "build the database" steps to your project (migrations + synthetic seed data). Copy this file to
+# .github/workflows/plan-guard.yml in your repository.
+
+name: plan-guard
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write # for the PR comment
+
+jobs:
+  plans:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DB: "Host=localhost;Port=5432;Username=postgres;Password=ci-only;Database=app"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Service containers cannot pass server flags, and pg_stat_statements must be preloaded, so start it directly.
+      - name: Start PostgreSQL with pg_stat_statements
+        run: |
+          docker run -d --name pg -e POSTGRES_PASSWORD=ci-only -e POSTGRES_DB=app -p 5432:5432 postgres:17-alpine \
+            -c shared_preload_libraries=pg_stat_statements -c compute_query_id=on
+          for i in $(seq 1 30); do docker exec pg pg_isready -U postgres && break; sleep 1; done
+
+      - name: Build the database for the base commit
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git worktree add ../base "$BASE_SHA"
+          (cd ../base && ./scripts/migrate.sh && ./scripts/seed-synthetic.sh)   # your project's commands
+
+      - name: Capture base
+        uses: hekimcan206/plan-guard@v1
+        with:
+          command: capture
+          config: plan-guard.json
+          connection: ${{ env.DB }}
+          label: base
+          output: base.json
+
+      - name: Rebuild the database for the pull request
+        run: |
+          docker exec pg psql -U postgres -c "DROP DATABASE app WITH (FORCE)" -c "CREATE DATABASE app"
+          ./scripts/migrate.sh && ./scripts/seed-synthetic.sh
+
+      - name: Capture head
+        uses: hekimcan206/plan-guard@v1
+        with:
+          command: capture
+          config: plan-guard.json
+          connection: ${{ env.DB }}
+          label: head
+          output: head.json
+
+      # Optional: also plan every statement your test suite ran.
+      # - run: dotnet test   # or npm test, pytest ... against $DB
+      # - uses: hekimcan206/plan-guard@v1
+      #   with: { command: discover, connection: "${{ env.DB }}", label: head, output: head-discovered.json }
+
+      - name: Compare, comment and fail on a regression
+        uses: hekimcan206/plan-guard@v1
+        with:
+          command: compare
+          config: plan-guard.json
+          baseline: base.json
+          candidate: head.json
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: plan-guard-snapshots
+          path: "*.json"
+          retention-days: 14
