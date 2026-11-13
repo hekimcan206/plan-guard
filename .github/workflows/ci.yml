@@ -1,0 +1,283 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+jobs:
+  build-test:
+    name: build & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore
+
+      # Package versions are pinned and updated by hand, so a known vulnerability in any direct or
+      # transitive package fails the build. Fix it with a pinned upgrade in Directory.Packages.props.
+      - name: Audit for vulnerable packages
+        run: |
+          set -o pipefail
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable-packages.txt
+          if grep -q "has the following vulnerable packages" vulnerable-packages.txt; then
+            echo "::error::Known-vulnerable NuGet packages found (see the list above)"
+            exit 1
+          fi
+
+      - name: Format check
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build (warnings are errors)
+        run: dotnet build --no-restore --configuration Release
+
+      - name: Pre-pull integration test images
+        run: |
+          docker pull postgres:17-alpine &
+          docker pull postgres:16-alpine &
+          docker pull postgres:18 &
+          wait
+
+      # Unit, FsCheck property and golden tests, then the Testcontainers suites: every lab scenario against the
+      # seeded shop database on PostgreSQL 17, discovery, the snapshot store, and capture on 16 and 18.
+      - name: Test
+        run: >
+          dotnet test --no-build --configuration Release
+          --coverage --coverage-output-format cobertura
+          --results-directory "${{ github.workspace }}/TestResults"
+
+      - name: Coverage summary
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.12
+        with:
+          reports: TestResults/**/*.cobertura.xml
+          targetdir: coverage
+          reporttypes: MarkdownSummaryGithub
+          assemblyfilters: "-*Tests*;-*Benchmarks*;-plan-guard-lab"
+          filefilters: "-*/obj/*"
+
+      - name: Publish coverage to job summary
+        if: always()
+        run: |
+          if [ -f coverage/SummaryGithub.md ]; then
+            cat coverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No coverage report produced."
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-results
+          path: TestResults/
+          retention-days: 7
+
+  pack:
+    name: pack .NET tool
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Pack
+        run: dotnet pack src/PlanGuard.Cli/PlanGuard.Cli.csproj --configuration Release --output artifacts
+
+      # The package must install as a tool and run: the usage path exits 2 without touching a database.
+      - name: Install and smoke-test the tool
+        run: |
+          unzip -l artifacts/PlanGuard.*.nupkg | grep -E "README\.md|tools/net10\.0/any/plan-guard\.dll"
+          dotnet tool install PlanGuard --tool-path ./tool --add-source ./artifacts --version 1.0.0
+          ./tool/plan-guard --version
+          set +e
+          ./tool/plan-guard nonsense-command
+          test $? -eq 2
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nuget-package
+          path: artifacts/*.nupkg
+          retention-days: 30
+
+  # The composite action at the repository root, used exactly as a consumer would use it (uses: ./):
+  # a "pull request" that drops an index must fail, an unchanged database must pass.
+  action-selftest:
+    name: github action self-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ADMIN: "Host=localhost;Port=5432;Username=postgres;Password=ci-only;Timeout=60;Command Timeout=600"
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - name: Start PostgreSQL 17 with pg_stat_statements
+        run: |
+          docker run -d --name pg -e POSTGRES_PASSWORD=ci-only -p 5432:5432 postgres:17-alpine \
+            -c shared_preload_libraries=pg_stat_statements -c compute_query_id=on
+          for i in $(seq 1 30); do docker exec pg pg_isready -U postgres && break; sleep 1; done
+
+      - name: Seed main, clone it for the pull request and apply the PR migration
+        run: |
+          dotnet run --project src/PlanGuard.Lab -c Release -- seed --database shop_main --connection "$ADMIN"
+          docker exec pg createdb -U postgres -T shop_main shop_pr
+          dotnet run --project src/PlanGuard.Lab -c Release --no-build -- apply --database shop_pr --scenario drop-customer-index --connection "$ADMIN"
+
+      - name: Capture main
+        uses: ./
+        with:
+          command: capture
+          config: samples/shop/plan-guard.json
+          connection: ${{ env.ADMIN }};Database=shop_main
+          label: main
+          output: main.json
+
+      - name: Capture the pull request
+        uses: ./
+        with:
+          command: capture
+          config: samples/shop/plan-guard.json
+          connection: ${{ env.ADMIN }};Database=shop_pr
+          label: pr
+          output: pr.json
+
+      - name: Capture main again (A/A)
+        uses: ./
+        with:
+          command: capture
+          config: samples/shop/plan-guard.json
+          connection: ${{ env.ADMIN }};Database=shop_main
+          label: main-again
+          output: main-again.json
+
+      - name: Compare (must fail)
+        id: regression
+        continue-on-error: true
+        uses: ./
+        with:
+          command: compare
+          config: samples/shop/plan-guard.json
+          baseline: main.json
+          candidate: pr.json
+          comment: "false"
+
+      - name: Compare unchanged (must pass)
+        id: unchanged
+        uses: ./
+        with:
+          command: compare
+          config: samples/shop/plan-guard.json
+          baseline: main.json
+          candidate: main-again.json
+          comment: "false"
+
+      - name: Assert the verdicts
+        env:
+          REGRESSION_OUTCOME: ${{ steps.regression.outcome }}
+          REGRESSION_VERDICT: ${{ steps.regression.outputs.verdict }}
+          REGRESSION_REPORT: ${{ steps.regression.outputs.report }}
+          UNCHANGED_VERDICT: ${{ steps.unchanged.outputs.verdict }}
+        run: |
+          test "$REGRESSION_OUTCOME" = "failure"
+          test "$REGRESSION_VERDICT" = "fail"
+          test "$UNCHANGED_VERDICT" = "pass"
+          grep -q '| `customer_recent_orders` | \*\*FAIL\*\* |' "$REGRESSION_REPORT"
+          grep -q 'Seq Scan on orders' "$REGRESSION_REPORT"
+          cp "$REGRESSION_REPORT" pr-comment.md
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: action-selftest
+          path: |
+            main.json
+            pr.json
+            pr-comment.md
+          retention-days: 14
+
+  container:
+    name: container image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: plan-guard:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Verify the image runs as non-root and the CLI starts
+        run: |
+          user=$(docker image inspect plan-guard:ci --format '{{.Config.User}}')
+          echo "Configured user: ${user}"
+          test -n "${user}" && test "${user}" != "0" && test "${user}" != "root"
+          docker run --rm plan-guard:ci --version
+
+  compose-demo:
+    name: docker compose demo
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      # The README promises `docker compose up` runs the whole demo with zero manual steps; this job keeps it true.
+      - name: Run the demo
+        run: |
+          docker compose up --build --exit-code-from demo demo 2>&1 | tee demo.log
+          grep -q "DEMO_OK" demo.log
+
+      - name: The report names both regressions
+        run: |
+          docker compose cp demo:/out ./demo-output
+          grep -q '| `customer_recent_orders` | \*\*FAIL\*\* |' demo-output/report.md
+          grep -q '| `orders_page` | \*\*FAIL\*\* |' demo-output/report.md
+          grep -q '| `top_customers` | improved |' demo-output/report.md
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs
