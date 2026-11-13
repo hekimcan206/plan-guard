@@ -31,13 +31,18 @@ FROM generate_series(1, 5000) AS g;
 
 -- Orders and lines are generated into temporary tables first, so each order's total is known before it is
 -- inserted and no row is ever updated (no dead tuples, no VACUUM FULL needed).
+-- Ids follow creation time, as with a sequence: the table is physically ordered by created_at, so time-range
+-- queries touch few pages when an index lets them, and keyset pagination by id stays cheap.
 CREATE TEMP TABLE seed_orders AS
-SELECT g AS id,
+SELECT row_number() OVER (ORDER BY created_at, g)::bigint AS id, store_id, customer_id, status, created_at
+FROM (
+    SELECT g,
        1 + floor(random() * 200)::int AS store_id,
        CASE WHEN random() < 0.85 THEN 1 + floor(random() * 50000)::int END AS customer_id,
        CASE WHEN r < 0.02 THEN 'open' WHEN r < 0.05 THEN 'cancelled' ELSE 'paid' END AS status,
        TIMESTAMPTZ '2026-01-01 00:00:00+00' + random() * INTERVAL '300 days' AS created_at
-FROM (SELECT g, random() AS r FROM generate_series(1, 300000) AS g) AS s;
+    FROM (SELECT g, random() AS r FROM generate_series(1, 300000) AS g) AS s
+) AS generated;
 
 -- Three lines per order on average (1 to 5), each an item of the order's own store.
 CREATE TEMP TABLE seed_lines AS

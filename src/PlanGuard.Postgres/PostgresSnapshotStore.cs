@@ -19,9 +19,9 @@ public sealed class PostgresSnapshotStore(NpgsqlDataSource dataSource, string sc
     {
         // Identifiers cannot be bound; the schema name is validated against a strict pattern in the constructor.
 #pragma warning disable CA2100
-        await using var cmd = dataSource.CreateCommand($"""
-            CREATE SCHEMA IF NOT EXISTS {_schema};
-            CREATE TABLE IF NOT EXISTS {_schema}.snapshots (
+        await using var cmd = dataSource.CreateCommand($$"""
+            CREATE SCHEMA IF NOT EXISTS {{_schema}};
+            CREATE TABLE IF NOT EXISTS {{_schema}}.snapshots (
                 id             bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
                 label          text        NOT NULL CHECK (length(label) BETWEEN 1 AND 200),
                 git_sha        text        CHECK (git_sha ~ '^[0-9a-f]{7,64}$'),
@@ -31,7 +31,7 @@ public sealed class PostgresSnapshotStore(NpgsqlDataSource dataSource, string sc
                 query_count    int         NOT NULL,
                 body           jsonb       NOT NULL
             );
-            CREATE INDEX IF NOT EXISTS snapshots_label_captured_idx ON {_schema}.snapshots (label, captured_at DESC);
+            CREATE INDEX IF NOT EXISTS snapshots_label_captured_idx ON {{_schema}}.snapshots (label, captured_at DESC);
             """);
 #pragma warning restore CA2100
         await cmd.ExecuteNonQueryAsync(ct);
@@ -67,9 +67,9 @@ public sealed class PostgresSnapshotStore(NpgsqlDataSource dataSource, string sc
     public async Task<IReadOnlyList<StoredSnapshot>> ListAsync(string? label = null, int limit = 50, CancellationToken ct = default)
     {
 #pragma warning disable CA2100
-        await using var cmd = dataSource.CreateCommand($"""
+        await using var cmd = dataSource.CreateCommand($$"""
             SELECT id, label, git_sha, captured_at, server_version, query_count
-            FROM {_schema}.snapshots
+            FROM {{_schema}}.snapshots
             WHERE $1::text IS NULL OR label = $1
             ORDER BY captured_at DESC, id DESC
             LIMIT $2

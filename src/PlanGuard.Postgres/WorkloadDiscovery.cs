@@ -63,7 +63,15 @@ public sealed class WorkloadDiscovery(NpgsqlDataSource dataSource)
 
             try
             {
-                var plan = await PostgresCapturer.ExplainAsync(conn, "EXPLAIN (GENERIC_PLAN, VERBOSE, FORMAT JSON) ", SqlText.EnsureSingleStatement(sql), ct);
+                var statement = SqlText.EnsureSingleStatement(sql);
+                var plan = await GenericPlanAsync(conn, statement, ct);
+                if (!TouchesUserTables(plan.Root))
+                {
+                    // Driver bootstrap (type loading), SELECT version(), current_setting(...): not the application's queries.
+                    skipped.Add((sql, "touches no user tables"));
+                    continue;
+                }
+
                 queries.Add(new QuerySnapshot
                 {
                     Id = id,
@@ -140,5 +148,49 @@ public sealed class WorkloadDiscovery(NpgsqlDataSource dataSource)
         }
 
         return list;
+    }
+
+    internal static bool TouchesUserTables(PlanNode root) =>
+        root.Descendants().Any(n => n.RelationName is not null && n.Schema is not ("pg_catalog" or "information_schema"));
+
+    /// <summary>
+    /// EXPLAIN (GENERIC_PLAN) through a temporary PL/pgSQL function. Sent directly, Npgsql's extended protocol
+    /// makes the server treat the statement's $n placeholders as parameters of the EXPLAIN itself: with no values
+    /// bound it refuses the statement, and with NULLs bound the planner folds them into constants (a one-time
+    /// "false" filter instead of the real plan). Dynamic EXECUTE inside the function has no parameters, which is
+    /// exactly the situation GENERIC_PLAN is designed for. The statement travels as a bound text value and the
+    /// function lives in pg_temp inside a transaction that is rolled back, so nothing is left behind.
+    /// </summary>
+    internal static async Task<ExplainResult> GenericPlanAsync(NpgsqlConnection conn, string sql, CancellationToken ct)
+    {
+        await using var tx = await conn.BeginTransactionAsync(ct);
+        try
+        {
+            await using (var create = new NpgsqlCommand("""
+                CREATE FUNCTION pg_temp.plan_guard_generic_plan(statement text) RETURNS text
+                LANGUAGE plpgsql AS $fn$
+                DECLARE result text;
+                BEGIN
+                    EXECUTE 'EXPLAIN (GENERIC_PLAN, VERBOSE, FORMAT JSON) ' || statement INTO result;
+                    RETURN result;
+                END
+                $fn$
+                """, conn, tx))
+            {
+                await create.ExecuteNonQueryAsync(ct);
+            }
+
+            await using var explain = new NpgsqlCommand("SELECT pg_temp.plan_guard_generic_plan($1)", conn, tx);
+            explain.Parameters.AddWithValue(sql);
+            var json = (string?)await explain.ExecuteScalarAsync(ct) ?? throw new InvalidOperationException("EXPLAIN returned no rows.");
+            return ExplainJsonParser.Parse(json);
+        }
+        finally
+        {
+            if (tx.Connection is not null)
+            {
+                await tx.RollbackAsync(CancellationToken.None);
+            }
+        }
     }
 }

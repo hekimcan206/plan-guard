@@ -39,36 +39,36 @@ try
     switch (command)
     {
         case "seed":
-        {
-            var db = Opt("database") ?? "shop";
-            var sw = System.Diagnostics.Stopwatch.StartNew();
-            await shop.CreateAsync(db, cts.Token);
-            Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"seeded {db} in {sw.Elapsed.TotalSeconds:0.0} s"));
-            return 0;
-        }
-
-        case "apply":
-        {
-            var scenario = ScenarioCatalog.Get(Opt("scenario") ?? throw new ArgumentException("--scenario is required"));
-            await shop.ApplyAsync(Opt("database") ?? "shop", scenario, cts.Token);
-            Console.WriteLine($"applied {scenario.Id}: {scenario.Description}");
-            return 0;
-        }
-
-        case "queries":
-        {
-            var scenario = ScenarioCatalog.Get(Opt("scenario") ?? throw new ArgumentException("--scenario is required"));
-            var outDir = Opt("out") ?? throw new ArgumentException("--out is required");
-            Directory.CreateDirectory(Path.Combine(outDir, "queries"));
-            File.Copy(Path.Combine(shop.SampleDirectory, "plan-guard.json"), Path.Combine(outDir, "plan-guard.json"), overwrite: true);
-            foreach (var q in ShopDatabase.Catalog(shop.LoadConfig(), scenario))
             {
-                await File.WriteAllTextAsync(Path.Combine(outDir, "queries", q.Id + ".sql"), q.Sql + "\n", cts.Token);
+                var db = Opt("database") ?? "shop";
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                await shop.CreateAsync(db, cts.Token);
+                Console.WriteLine(string.Create(CultureInfo.InvariantCulture, $"seeded {db} in {sw.Elapsed.TotalSeconds:0.0} s"));
+                return 0;
             }
 
-            Console.WriteLine($"wrote the {scenario.Id} catalog to {outDir}");
-            return 0;
-        }
+        case "apply":
+            {
+                var scenario = ScenarioCatalog.Get(Opt("scenario") ?? throw new ArgumentException("--scenario is required"));
+                await shop.ApplyAsync(Opt("database") ?? "shop", scenario, cts.Token);
+                Console.WriteLine($"applied {scenario.Id}: {scenario.Description}");
+                return 0;
+            }
+
+        case "queries":
+            {
+                var scenario = ScenarioCatalog.Get(Opt("scenario") ?? throw new ArgumentException("--scenario is required"));
+                var outDir = Opt("out") ?? throw new ArgumentException("--out is required");
+                Directory.CreateDirectory(Path.Combine(outDir, "queries"));
+                File.Copy(Path.Combine(shop.SampleDirectory, "plan-guard.json"), Path.Combine(outDir, "plan-guard.json"), overwrite: true);
+                foreach (var q in ShopDatabase.Catalog(shop.LoadConfig(), scenario))
+                {
+                    await File.WriteAllTextAsync(Path.Combine(outDir, "queries", q.Id + ".sql"), q.Sql + "\n", cts.Token);
+                }
+
+                Console.WriteLine($"wrote the {scenario.Id} catalog to {outDir}");
+                return 0;
+            }
 
         case "scenarios":
             foreach (var s in ScenarioCatalog.All)

@@ -146,7 +146,11 @@ public sealed class PostgresCapturer(NpgsqlDataSource dataSource)
         }
         finally
         {
-            await tx.RollbackAsync(CancellationToken.None);
+            // After a protocol-level failure the connection is already broken and the transaction gone.
+            if (tx.Connection is not null)
+            {
+                await tx.RollbackAsync(CancellationToken.None);
+            }
         }
     }
 }
