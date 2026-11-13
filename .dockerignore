@@ -9,6 +9,7 @@
 docs/
 tests/
 *.md
+!README.md
 .env
 docker-compose*.yml
 Dockerfile

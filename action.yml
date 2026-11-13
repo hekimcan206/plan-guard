@@ -1,0 +1,131 @@
+name: "plan-guard: PostgreSQL query-plan regression check"
+description: "Captures EXPLAIN plans and pg_stat_statements for a query catalog, compares a pull request with its base, fails the build and comments on the PR when a change makes a query do more work."
+author: "hekimcan206"
+branding:
+  icon: "activity"
+  color: "blue"
+
+inputs:
+  command:
+    description: "capture (run the catalog with EXPLAIN ANALYZE), discover (plan the statements pg_stat_statements saw) or compare."
+    required: true
+  config:
+    description: "Path of plan-guard.json (capture: catalog and settings; compare: thresholds, ignore list, fail-on)."
+    required: false
+    default: "plan-guard.json"
+  connection:
+    description: "Npgsql connection string of the database under test (capture/discover). Pass it from a secret or an env-built value."
+    required: false
+    default: ""
+  label:
+    description: "Snapshot label, e.g. base or head (capture/discover)."
+    required: false
+    default: "candidate"
+  output:
+    description: "Where to write the snapshot (capture/discover)."
+    required: false
+    default: "plan-guard-snapshot.json"
+  baseline:
+    description: "Baseline snapshot path (compare)."
+    required: false
+    default: ""
+  candidate:
+    description: "Candidate snapshot path (compare)."
+    required: false
+    default: ""
+  fail-on:
+    description: "fail (default: only regressions fail the step) or warn (warnings fail it too)."
+    required: false
+    default: ""
+  comment:
+    description: "On pull_request events, create or update one plan-guard comment on the PR (true/false)."
+    required: false
+    default: "true"
+  github-token:
+    description: "Token for the PR comment; needs pull-requests: write."
+    required: false
+    default: ${{ github.token }}
+
+outputs:
+  snapshot:
+    description: "Path of the written snapshot (capture/discover)."
+    value: ${{ steps.run.outputs.snapshot }}
+  report:
+    description: "Path of the Markdown report (compare)."
+    value: ${{ steps.run.outputs.report }}
+  json-report:
+    description: "Path of the JSON report (compare)."
+    value: ${{ steps.run.outputs.json-report }}
+  verdict:
+    description: "pass or fail (compare)."
+    value: ${{ steps.run.outputs.verdict }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/setup-dotnet@v6
+      with:
+        global-json-file: ${{ github.action_path }}/global.json
+
+    - name: Build plan-guard
+      shell: bash
+      env:
+        ACTION_PATH: ${{ github.action_path }}
+        DOTNET_NOLOGO: "true"
+        DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+      run: |
+        if [ ! -f "$RUNNER_TEMP/plan-guard/plan-guard.dll" ]; then
+          dotnet publish "$ACTION_PATH/src/PlanGuard.Cli/PlanGuard.Cli.csproj" -c Release -o "$RUNNER_TEMP/plan-guard" --nologo -v quiet
+        fi
+
+    # Inputs reach the script only through environment variables, never through ${{ }} interpolation inside the
+    # script body, so a crafted input (branch name, label) cannot inject shell commands.
+    - name: Run plan-guard
+      id: run
+      shell: bash
+      working-directory: ${{ github.workspace }}
+      env:
+        PG_COMMAND: ${{ inputs.command }}
+        PG_CONFIG: ${{ inputs.config }}
+        PLANGUARD_CONNECTION: ${{ inputs.connection }}
+        PG_LABEL: ${{ inputs.label }}
+        PG_OUTPUT: ${{ inputs.output }}
+        PG_BASELINE: ${{ inputs.baseline }}
+        PG_CANDIDATE: ${{ inputs.candidate }}
+        PG_FAIL_ON: ${{ inputs.fail-on }}
+        PG_COMMENT: ${{ inputs.comment }}
+        PG_PR_NUMBER: ${{ github.event.pull_request.number }}
+        PG_TOKEN: ${{ inputs.github-token }}
+      run: |
+        set -uo pipefail
+        tool=(dotnet "$RUNNER_TEMP/plan-guard/plan-guard.dll")
+        case "$PG_COMMAND" in
+          capture|discover)
+            args=("$PG_COMMAND" --label "$PG_LABEL" --out "$PG_OUTPUT")
+            if [ "$PG_COMMAND" = "capture" ] || [ -f "$PG_CONFIG" ]; then args+=(--config "$PG_CONFIG"); fi
+            "${tool[@]}" "${args[@]}" || exit $?
+            echo "snapshot=$PG_OUTPUT" >> "$GITHUB_OUTPUT"
+            ;;
+          compare)
+            report="$RUNNER_TEMP/plan-guard-report-$RANDOM.md"
+            json="$RUNNER_TEMP/plan-guard-report-$RANDOM.json"
+            args=(compare --baseline "$PG_BASELINE" --candidate "$PG_CANDIDATE" --markdown "$report" --json "$json" --github)
+            if [ -f "$PG_CONFIG" ]; then args+=(--config "$PG_CONFIG"); fi
+            if [ -n "$PG_FAIL_ON" ]; then args+=(--fail-on "$PG_FAIL_ON"); fi
+            "${tool[@]}" "${args[@]}"
+            code=$?
+            echo "report=$report" >> "$GITHUB_OUTPUT"
+            echo "json-report=$json" >> "$GITHUB_OUTPUT"
+            if [ "$code" -eq 0 ]; then echo "verdict=pass" >> "$GITHUB_OUTPUT"; elif [ "$code" -eq 1 ]; then echo "verdict=fail" >> "$GITHUB_OUTPUT"; fi
+            if [ "$code" -le 1 ] && [ "$PG_COMMENT" = "true" ] && [ -n "$PG_PR_NUMBER" ] && [ -f "$report" ]; then
+              # A failed comment (e.g. a fork PR with a read-only token) must not hide the verdict.
+              GITHUB_TOKEN="$PG_TOKEN" "${tool[@]}" comment --report "$report" --pr "$PG_PR_NUMBER" \
+                || echo "::warning title=plan-guard::Could not comment on the pull request (read-only token on a fork PR?)."
+            fi
+            exit "$code"
+            ;;
+          *)
+            echo "::error title=plan-guard::command must be capture, discover or compare, not '$PG_COMMAND'"
+            exit 2
+            ;;
+        esac
