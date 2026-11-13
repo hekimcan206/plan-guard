@@ -9,4 +9,7 @@
     <Project Path="tests/PlanGuard.IntegrationTests/PlanGuard.IntegrationTests.csproj" />
     <Project Path="tests/PlanGuard.UnitTests/PlanGuard.UnitTests.csproj" />
   </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/PlanGuard.Benchmarks/PlanGuard.Benchmarks.csproj" />
+  </Folder>
 </Solution>

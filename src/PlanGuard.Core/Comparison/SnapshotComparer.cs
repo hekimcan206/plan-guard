@@ -19,6 +19,9 @@ public static class SnapshotComparer
         thresholds.Validate();
         ignore ??= new HashSet<string>(StringComparer.Ordinal);
 
+        // Indexed once: a linear Find per id made the comparison quadratic (18 ms for 2,000 queries, docs/benchmarks.md).
+        var baselineById = baseline.Queries.ToDictionary(q => q.Id, StringComparer.Ordinal);
+        var candidateById = candidate.Queries.ToDictionary(q => q.Id, StringComparer.Ordinal);
         var results = new List<QueryComparison>();
         var ids = baseline.Queries.Select(q => q.Id)
             .Concat(candidate.Queries.Select(q => q.Id))
@@ -27,8 +30,8 @@ public static class SnapshotComparer
 
         foreach (var id in ids)
         {
-            var b = baseline.Find(id);
-            var c = candidate.Find(id);
+            baselineById.TryGetValue(id, out var b);
+            candidateById.TryGetValue(id, out var c);
             results.Add(ignore.Contains(id)
                 ? new QueryComparison { Id = id, Verdict = Verdict.Ignored, Findings = [], Baseline = b, Candidate = c }
                 : CompareQuery(id, b, c, thresholds));

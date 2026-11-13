@@ -1,0 +1,2004 @@
+[
+  {
+    "condition": "quiet",
+    "noiseWorkers": 0,
+    "repetitions": 20,
+    "aaPlain": {
+      "time-1run-1.2x": {
+        "flaggedPairs": 20,
+        "pairs": 200,
+        "failingBuilds": 12,
+        "builds": 20
+      },
+      "time-median-1.2x": {
+        "flaggedPairs": 24,
+        "pairs": 200,
+        "failingBuilds": 14,
+        "builds": 20
+      },
+      "time-median-2x\u002B5ms": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "cost-1.5x\u002B50": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-shape": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "buffers-1.3x\u002B64": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-guard-default": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      }
+    },
+    "aaReanalyzed": {
+      "time-1run-1.2x": {
+        "flaggedPairs": 28,
+        "pairs": 200,
+        "failingBuilds": 14,
+        "builds": 20
+      },
+      "time-median-1.2x": {
+        "flaggedPairs": 36,
+        "pairs": 200,
+        "failingBuilds": 13,
+        "builds": 20
+      },
+      "time-median-2x\u002B5ms": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "cost-1.5x\u002B50": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-shape": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "buffers-1.3x\u002B64": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-guard-default": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      }
+    },
+    "scenarios": [
+      {
+        "id": "drop-customer-index",
+        "kind": "regression",
+        "target": "customer_recent_orders",
+        "description": "Migration drops orders_customer_idx (\u0022unused\u0022 according to a stale report).",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders",
+              "open_orders_queue",
+              "orders_page"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email",
+              "customer_recent_orders",
+              "order_detail"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 10,
+          "candidateShared": 2509,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 27.75,
+          "candidateCost": 5678.39,
+          "baselineMs": 0.091,
+          "candidateMs": 10.87
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "customer_recent_orders": "Fail"
+        }
+      },
+      {
+        "id": "drop-fk-index",
+        "kind": "regression",
+        "target": "order_detail",
+        "description": "Migration drops the index behind the order_items -\u003E orders foreign key.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "order_detail",
+              "store_top_items",
+              "top_customers"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_by_email",
+              "customer_recent_orders",
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 10,
+          "candidateShared": 7507,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 41.75,
+          "candidateCost": 13204.55,
+          "baselineMs": 0.055,
+          "candidateMs": 23.972
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "order_detail": "Fail",
+          "store_top_items": "Fail"
+        }
+      },
+      {
+        "id": "non-sargable-date",
+        "kind": "regression",
+        "target": "store_daily_revenue",
+        "description": "Query rewritten to filter on created_at::date, so the (store_id, created_at) range scan becomes store_id only.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue",
+              "orders_page",
+              "store_daily_revenue",
+              "top_customers"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_daily_revenue",
+              "top_customers"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "store_daily_revenue"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "store_daily_revenue"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "store_daily_revenue"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 121,
+          "candidateShared": 1122,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 505.07,
+          "candidateCost": 2330.02,
+          "baselineMs": 0.639,
+          "candidateMs": 1.432
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "store_daily_revenue": "Fail"
+        }
+      },
+      {
+        "id": "lost-functional-index",
+        "kind": "regression",
+        "target": "customer_by_email",
+        "description": "Query switched from lower(email) = lower($1) to ILIKE, which the expression index cannot serve.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email",
+              "order_detail"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 4,
+          "candidateShared": 569,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 8.43,
+          "candidateCost": 1194,
+          "baselineMs": 0.046,
+          "candidateMs": 19.551
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "customer_by_email": "Fail"
+        }
+      },
+      {
+        "id": "partial-index-mismatch",
+        "kind": "regression",
+        "target": "open_orders_queue",
+        "description": "Status list widened to IN (\u0027open\u0027,\u0027cancelled\u0027), so the partial index WHERE status = \u0027open\u0027 no longer applies.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue",
+              "orders_page"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 21,
+          "candidateShared": 2512,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 2.09,
+          "candidateCost": 5977.93,
+          "baselineMs": 0.054,
+          "candidateMs": 20.369
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "open_orders_queue": "Fail"
+        }
+      },
+      {
+        "id": "offset-pagination",
+        "kind": "regression",
+        "target": "orders_page",
+        "description": "Keyset pagination replaced by OFFSET 150000.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "orders_page"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 4,
+          "candidateShared": 1653,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 2.26,
+          "candidateCost": 5139.63,
+          "baselineMs": 0.055,
+          "candidateMs": 19.565
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "orders_page": "Fail"
+        }
+      },
+      {
+        "id": "work-mem-spill",
+        "kind": "regression",
+        "target": "top_customers",
+        "description": "Deployment config lowers work_mem to 64kB; the aggregate and sort spill to temp files.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "top_customers"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "top_customers"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "top_customers"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 2472,
+          "candidateShared": 2508,
+          "baselineTemp": 31,
+          "candidateTemp": 320,
+          "baselineCost": 8152.63,
+          "candidateCost": 11003.26,
+          "baselineMs": 31.884,
+          "candidateMs": 39.754
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "top_customers": "Fail"
+        }
+      },
+      {
+        "id": "join-without-index",
+        "kind": "regression",
+        "target": "store_top_items",
+        "description": "Migration drops the order_items(order_id) index that the weekly item report joins through.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 479,
+          "candidateShared": 7955,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 468.37,
+          "candidateCost": 13389.66,
+          "baselineMs": 0.688,
+          "candidateMs": 41.362
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "order_detail": "Fail",
+          "store_top_items": "Fail"
+        }
+      },
+      {
+        "id": "add-unrelated-index",
+        "kind": "neutral",
+        "description": "Migration adds an index on menu_items(category) that no catalog query uses.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {}
+      },
+      {
+        "id": "add-nullable-column",
+        "kind": "neutral",
+        "description": "Migration adds a nullable column to orders (no table rewrite).",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "open_orders_queue",
+              "order_detail"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {}
+      },
+      {
+        "id": "reanalyze",
+        "kind": "neutral",
+        "description": "ANALYZE re-samples statistics: estimates move a little, plans should not.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {}
+      },
+      {
+        "id": "equivalent-rewrite",
+        "kind": "neutral",
+        "target": "customer_recent_orders",
+        "description": "Query rewritten with IN (...) and explicit column order: same plan, same work.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "store_top_items"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "numbers": {
+          "baselineShared": 10,
+          "candidateShared": 10,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 27.75,
+          "candidateCost": 27.75,
+          "baselineMs": 0.091,
+          "candidateMs": 0.054
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {}
+      },
+      {
+        "id": "covering-index",
+        "kind": "improvement",
+        "target": "top_customers",
+        "description": "Migration adds an index on orders(created_at) INCLUDE (customer_id, total) for the monthly export.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "top_customers"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "numbers": {
+          "baselineShared": 2472,
+          "candidateShared": 157,
+          "baselineTemp": 31,
+          "candidateTemp": 31,
+          "baselineCost": 8152.63,
+          "candidateCost": 2439.87,
+          "baselineMs": 31.884,
+          "candidateMs": 17.097
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {
+          "top_customers": "Improved"
+        }
+      }
+    ],
+    "noise": [
+      {
+        "id": "correct_order_total",
+        "medianMs": 0.097,
+        "cvSingleRun": 0.2857005770678589,
+        "cvMedian": 0.20006639558953257,
+        "medianSharedBlocks": 21,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 3.640625,
+        "distinctPlans": 1
+      },
+      {
+        "id": "customer_by_email",
+        "medianMs": 0.034,
+        "cvSingleRun": 0.41471342975601916,
+        "cvMedian": 0.3624824063288577,
+        "medianSharedBlocks": 4,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 4.6,
+        "distinctPlans": 1
+      },
+      {
+        "id": "customer_recent_orders",
+        "medianMs": 0.074,
+        "cvSingleRun": 0.5334917829846563,
+        "cvMedian": 0.1845331892014845,
+        "medianSharedBlocks": 10,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 8.727272727272727,
+        "distinctPlans": 1
+      },
+      {
+        "id": "customers_per_city",
+        "medianMs": 7.617,
+        "cvSingleRun": 0.1734385051330698,
+        "cvMedian": 0.10925801314656078,
+        "medianSharedBlocks": 569,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 2.3162433364691126,
+        "distinctPlans": 1
+      },
+      {
+        "id": "open_orders_queue",
+        "medianMs": 0.054,
+        "cvSingleRun": 0.5782198972110258,
+        "cvMedian": 0.19362909550746543,
+        "medianSharedBlocks": 21,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 10.333333333333334,
+        "distinctPlans": 1
+      },
+      {
+        "id": "order_detail",
+        "medianMs": 0.068,
+        "cvSingleRun": 1.5800939955766555,
+        "cvMedian": 0.20669190623358852,
+        "medianSharedBlocks": 10,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 29.176470588235297,
+        "distinctPlans": 1
+      },
+      {
+        "id": "orders_page",
+        "medianMs": 0.044,
+        "cvSingleRun": 0.4604659456172905,
+        "cvMedian": 0.4107214573637008,
+        "medianSharedBlocks": 4,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 6.033333333333333,
+        "distinctPlans": 1
+      },
+      {
+        "id": "store_daily_revenue",
+        "medianMs": 0.271,
+        "cvSingleRun": 0.40435385338251567,
+        "cvMedian": 0.31893637008794057,
+        "medianSharedBlocks": 121,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 5.212121212121212,
+        "distinctPlans": 1
+      },
+      {
+        "id": "store_top_items",
+        "medianMs": 0.356,
+        "cvSingleRun": 0.33012387374925845,
+        "cvMedian": 0.26190860105362623,
+        "medianSharedBlocks": 479,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 3.4632352941176467,
+        "distinctPlans": 1
+      },
+      {
+        "id": "top_customers",
+        "medianMs": 31.884,
+        "cvSingleRun": 0.13505191394698743,
+        "cvMedian": 0.0835014141976693,
+        "medianSharedBlocks": 2472,
+        "cvSharedBlocks": 0.00017653468786547142,
+        "maxOverMinSingleRun": 2.014456316781898,
+        "distinctPlans": 1
+      }
+    ],
+    "medianCaptureSeconds": 0.5888837499999999,
+    "serverVersion": "17.11"
+  },
+  {
+    "condition": "loaded",
+    "noiseWorkers": 4,
+    "repetitions": 20,
+    "aaPlain": {
+      "time-1run-1.2x": {
+        "flaggedPairs": 73,
+        "pairs": 200,
+        "failingBuilds": 20,
+        "builds": 20
+      },
+      "time-median-1.2x": {
+        "flaggedPairs": 57,
+        "pairs": 200,
+        "failingBuilds": 19,
+        "builds": 20
+      },
+      "time-median-2x\u002B5ms": {
+        "flaggedPairs": 3,
+        "pairs": 200,
+        "failingBuilds": 3,
+        "builds": 20
+      },
+      "cost-1.5x\u002B50": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-shape": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "buffers-1.3x\u002B64": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-guard-default": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      }
+    },
+    "aaReanalyzed": {
+      "time-1run-1.2x": {
+        "flaggedPairs": 83,
+        "pairs": 200,
+        "failingBuilds": 20,
+        "builds": 20
+      },
+      "time-median-1.2x": {
+        "flaggedPairs": 44,
+        "pairs": 200,
+        "failingBuilds": 18,
+        "builds": 20
+      },
+      "time-median-2x\u002B5ms": {
+        "flaggedPairs": 2,
+        "pairs": 200,
+        "failingBuilds": 2,
+        "builds": 20
+      },
+      "cost-1.5x\u002B50": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-shape": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "buffers-1.3x\u002B64": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      },
+      "plan-guard-default": {
+        "flaggedPairs": 0,
+        "pairs": 200,
+        "failingBuilds": 0,
+        "builds": 20
+      }
+    },
+    "scenarios": [
+      {
+        "id": "drop-customer-index",
+        "kind": "regression",
+        "target": "customer_recent_orders",
+        "description": "Migration drops orders_customer_idx (\u0022unused\u0022 according to a stale report).",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders",
+              "customers_per_city",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders",
+              "customers_per_city",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders",
+              "customers_per_city"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 10,
+          "candidateShared": 2509,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 27.75,
+          "candidateCost": 5678.39,
+          "baselineMs": 0.102,
+          "candidateMs": 32.991
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "customer_recent_orders": "Fail",
+          "customers_per_city": "Warn"
+        }
+      },
+      {
+        "id": "drop-fk-index",
+        "kind": "regression",
+        "target": "order_detail",
+        "description": "Migration drops the index behind the order_items -\u003E orders foreign key.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customers_per_city",
+              "order_detail",
+              "orders_page",
+              "store_top_items"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "open_orders_queue",
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 10,
+          "candidateShared": 7507,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 41.75,
+          "candidateCost": 13204.55,
+          "baselineMs": 0.107,
+          "candidateMs": 102.102
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "order_detail": "Fail",
+          "store_top_items": "Fail"
+        }
+      },
+      {
+        "id": "non-sargable-date",
+        "kind": "regression",
+        "target": "store_daily_revenue",
+        "description": "Query rewritten to filter on created_at::date, so the (store_id, created_at) range scan becomes store_id only.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "order_detail",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "store_daily_revenue"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "store_daily_revenue"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "store_daily_revenue"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 121,
+          "candidateShared": 1122,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 505.07,
+          "candidateCost": 2330.02,
+          "baselineMs": 0.339,
+          "candidateMs": 1.891
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "store_daily_revenue": "Fail"
+        }
+      },
+      {
+        "id": "lost-functional-index",
+        "kind": "regression",
+        "target": "customer_by_email",
+        "description": "Query switched from lower(email) = lower($1) to ILIKE, which the expression index cannot serve.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_by_email",
+              "customer_recent_orders",
+              "customers_per_city",
+              "order_detail",
+              "orders_page"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_by_email",
+              "customer_recent_orders",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_by_email"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 4,
+          "candidateShared": 569,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 8.43,
+          "candidateCost": 1194,
+          "baselineMs": 0.055,
+          "candidateMs": 92.596
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "customer_by_email": "Fail"
+        }
+      },
+      {
+        "id": "partial-index-mismatch",
+        "kind": "regression",
+        "target": "open_orders_queue",
+        "description": "Status list widened to IN (\u0027open\u0027,\u0027cancelled\u0027), so the partial index WHERE status = \u0027open\u0027 no longer applies.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders",
+              "customers_per_city",
+              "open_orders_queue",
+              "order_detail",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customers_per_city",
+              "open_orders_queue",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "customers_per_city",
+              "open_orders_queue"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "open_orders_queue"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 21,
+          "candidateShared": 2512,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 2.09,
+          "candidateCost": 5977.93,
+          "baselineMs": 0.071,
+          "candidateMs": 87.896
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "customers_per_city": "Warn",
+          "open_orders_queue": "Fail"
+        }
+      },
+      {
+        "id": "offset-pagination",
+        "kind": "regression",
+        "target": "orders_page",
+        "description": "Keyset pagination replaced by OFFSET 150000.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "customers_per_city",
+              "order_detail",
+              "orders_page",
+              "top_customers"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "customers_per_city",
+              "open_orders_queue",
+              "orders_page",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "customers_per_city",
+              "orders_page"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "orders_page"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 4,
+          "candidateShared": 1653,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 2.26,
+          "candidateCost": 5139.63,
+          "baselineMs": 0.105,
+          "candidateMs": 85.463
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "customers_per_city": "Warn",
+          "orders_page": "Fail"
+        }
+      },
+      {
+        "id": "work-mem-spill",
+        "kind": "regression",
+        "target": "top_customers",
+        "description": "Deployment config lowers work_mem to 64kB; the aggregate and sort spill to temp files.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "customer_recent_orders",
+              "customers_per_city",
+              "orders_page",
+              "top_customers"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "customers_per_city",
+              "open_orders_queue",
+              "store_daily_revenue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": [
+              "customers_per_city"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "top_customers"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "top_customers"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 2472,
+          "candidateShared": 2508,
+          "baselineTemp": 31,
+          "candidateTemp": 318,
+          "baselineCost": 8152.63,
+          "candidateCost": 11003.26,
+          "baselineMs": 172.263,
+          "candidateMs": 188.947
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "customers_per_city": "Warn",
+          "top_customers": "Fail"
+        }
+      },
+      {
+        "id": "join-without-index",
+        "kind": "regression",
+        "target": "store_top_items",
+        "description": "Migration drops the order_items(order_id) index that the weekly item report joins through.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "customers_per_city",
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": true,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "open_orders_queue",
+              "order_detail",
+              "store_daily_revenue",
+              "store_top_items"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          },
+          "plan-guard-default": {
+            "targetFlagged": true,
+            "flagged": [
+              "order_detail",
+              "store_top_items"
+            ]
+          }
+        },
+        "numbers": {
+          "baselineShared": 479,
+          "candidateShared": 7955,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 468.37,
+          "candidateCost": 13389.66,
+          "baselineMs": 0.687,
+          "candidateMs": 200.685
+        },
+        "planGuardFailedTarget": true,
+        "planGuardFailedBuild": true,
+        "verdicts": {
+          "order_detail": "Fail",
+          "store_top_items": "Fail"
+        }
+      },
+      {
+        "id": "add-unrelated-index",
+        "kind": "neutral",
+        "description": "Migration adds an index on menu_items(category) that no catalog query uses.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "open_orders_queue"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "open_orders_queue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {}
+      },
+      {
+        "id": "add-nullable-column",
+        "kind": "neutral",
+        "description": "Migration adds a nullable column to orders (no table rewrite).",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "customer_recent_orders",
+              "customers_per_city",
+              "order_detail",
+              "orders_page",
+              "store_daily_revenue",
+              "top_customers"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "customer_recent_orders",
+              "open_orders_queue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {}
+      },
+      {
+        "id": "reanalyze",
+        "kind": "neutral",
+        "description": "ANALYZE re-samples statistics: estimates move a little, plans should not.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "order_detail",
+              "orders_page",
+              "store_top_items"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders",
+              "customers_per_city"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": [
+              "customers_per_city"
+            ]
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {
+          "customers_per_city": "Warn"
+        }
+      },
+      {
+        "id": "equivalent-rewrite",
+        "kind": "neutral",
+        "target": "customer_recent_orders",
+        "description": "Query rewritten with IN (...) and explicit column order: same plan, same work.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "order_detail"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "open_orders_queue"
+            ]
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "numbers": {
+          "baselineShared": 10,
+          "candidateShared": 10,
+          "baselineTemp": 0,
+          "candidateTemp": 0,
+          "baselineCost": 27.75,
+          "candidateCost": 27.75,
+          "baselineMs": 0.102,
+          "candidateMs": 0.089
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {}
+      },
+      {
+        "id": "covering-index",
+        "kind": "improvement",
+        "target": "top_customers",
+        "description": "Migration adds an index on orders(created_at) INCLUDE (customer_id, total) for the monthly export.",
+        "detectors": {
+          "time-1run-1.2x": {
+            "targetFlagged": false,
+            "flagged": [
+              "correct_order_total",
+              "customer_recent_orders"
+            ]
+          },
+          "time-median-1.2x": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "time-median-2x\u002B5ms": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "cost-1.5x\u002B50": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-shape": {
+            "targetFlagged": true,
+            "flagged": [
+              "top_customers"
+            ]
+          },
+          "buffers-1.3x\u002B64": {
+            "targetFlagged": false,
+            "flagged": []
+          },
+          "plan-guard-default": {
+            "targetFlagged": false,
+            "flagged": []
+          }
+        },
+        "numbers": {
+          "baselineShared": 2472,
+          "candidateShared": 157,
+          "baselineTemp": 31,
+          "candidateTemp": 31,
+          "baselineCost": 8152.63,
+          "candidateCost": 2439.87,
+          "baselineMs": 172.263,
+          "candidateMs": 76.495
+        },
+        "planGuardFailedTarget": false,
+        "planGuardFailedBuild": false,
+        "verdicts": {
+          "top_customers": "Improved"
+        }
+      }
+    ],
+    "noise": [
+      {
+        "id": "correct_order_total",
+        "medianMs": 0.14,
+        "cvSingleRun": 0.7109515004301188,
+        "cvMedian": 0.23947170450553262,
+        "medianSharedBlocks": 21,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 14.906976744186048,
+        "distinctPlans": 1
+      },
+      {
+        "id": "customer_by_email",
+        "medianMs": 0.055,
+        "cvSingleRun": 0.5607097798342903,
+        "cvMedian": 0.24648726290735126,
+        "medianSharedBlocks": 4,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 9.5,
+        "distinctPlans": 1
+      },
+      {
+        "id": "customer_recent_orders",
+        "medianMs": 0.126,
+        "cvSingleRun": 0.8392354143286958,
+        "cvMedian": 0.2531557851568547,
+        "medianSharedBlocks": 10,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 21.57377049180328,
+        "distinctPlans": 1
+      },
+      {
+        "id": "customers_per_city",
+        "medianMs": 13.65,
+        "cvSingleRun": 0.9169808739788973,
+        "cvMedian": 1.0982427686086245,
+        "medianSharedBlocks": 569,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 14.704842428900847,
+        "distinctPlans": 1
+      },
+      {
+        "id": "open_orders_queue",
+        "medianMs": 0.08,
+        "cvSingleRun": 0.4890016281091632,
+        "cvMedian": 0.4228354084327302,
+        "medianSharedBlocks": 21,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 5.909090909090909,
+        "distinctPlans": 1
+      },
+      {
+        "id": "order_detail",
+        "medianMs": 0.104,
+        "cvSingleRun": 1.6876326751644184,
+        "cvMedian": 0.2422270603590002,
+        "medianSharedBlocks": 10,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 37.3125,
+        "distinctPlans": 1
+      },
+      {
+        "id": "orders_page",
+        "medianMs": 0.069,
+        "cvSingleRun": 0.3541853870493901,
+        "cvMedian": 0.2174876233557031,
+        "medianSharedBlocks": 4,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 5.279069767441861,
+        "distinctPlans": 1
+      },
+      {
+        "id": "store_daily_revenue",
+        "medianMs": 0.436,
+        "cvSingleRun": 5.4677693620771475,
+        "cvMedian": 0.1971537974121454,
+        "medianSharedBlocks": 121,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 341.99069767441864,
+        "distinctPlans": 1
+      },
+      {
+        "id": "store_top_items",
+        "medianMs": 0.551,
+        "cvSingleRun": 4.9689802994645715,
+        "cvMedian": 0.2072058636203703,
+        "medianSharedBlocks": 479,
+        "cvSharedBlocks": 0,
+        "maxOverMinSingleRun": 185.12111801242236,
+        "distinctPlans": 1
+      },
+      {
+        "id": "top_customers",
+        "medianMs": 116.054,
+        "cvSingleRun": 0.3262914155341937,
+        "cvMedian": 0.2592711174414686,
+        "medianSharedBlocks": 2472,
+        "cvSharedBlocks": 0.00017653468786547142,
+        "maxOverMinSingleRun": 8.936864915517292,
+        "distinctPlans": 1
+      }
+    ],
+    "medianCaptureSeconds": 2.2814187,
+    "serverVersion": "17.11"
+  }
+]

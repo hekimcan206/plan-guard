@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    <!-- Benchmark classes must be public and unsealed for BenchmarkDotNet's generated code. -->
+    <NoWarn>$(NoWarn);CA1515;CA1822</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PlanGuard.Core\PlanGuard.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\tests\PlanGuard.UnitTests\Fixtures\plans\*.json" LinkBase="plans" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>
